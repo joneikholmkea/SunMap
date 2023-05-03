@@ -13,9 +13,12 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -31,18 +34,27 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapView = findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
+        setupLocationService();
+    }
+
+    private void setupLocationService() {
         manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         listener = location -> {
             Log.i("myLocation", "new location " + location);
+            moveCamera(location.getLatitude(), location.getLongitude());
         };
         if(ActivityCompat.checkSelfPermission(this,
-                android.Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED){
+                Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},1);
         }else{
             manager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
                     2000, 10, listener);
         }
+    }
+
+    private void moveCamera(double lat, double lng){
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat,lng),10));
     }
 
     @Override
@@ -59,7 +71,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onMapReady(@NonNull GoogleMap gMap) {
         googleMap = gMap;
 //        googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-        // more later...
+        googleMap.setOnMapLongClickListener(latLng -> {
+            googleMap.addMarker(new MarkerOptions().position(latLng).title("Come here!"));
+        });
+    }
+    private void setpos(int a, int b){
+        // this.a = a
     }
 
     @Override
